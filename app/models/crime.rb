@@ -4,4 +4,12 @@ class Crime
   embeds_one :geometry
   embeds_one :properties
 
+  index({"geometry.coordinates" => '2d'}, { background: true })
+  index({"property.time" => 1})
+
+
+
+
 end
+
+#rake db:mongoid:create_indexes
