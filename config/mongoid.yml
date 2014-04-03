@@ -2,8 +2,8 @@ production:
   sessions:
     default:
       database: heroku_app23683383
-      host: ds029277.mongolab.com
-      port: 29277
+      hosts:
+        - ds029277.mongolab.com:29277
       username: admin
       password: admin123
       options:
