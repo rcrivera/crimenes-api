@@ -6,9 +6,6 @@ production:
         - ds029277.mongolab.com:29277
       username: admin
       password: admin123
-      options:
-        skip_version_check: true
-        safe: true
 development:
   # Configure available database sessions. (required)
   sessions:
