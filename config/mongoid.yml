@@ -1,3 +1,14 @@
+production:
+  sessions:
+    default:
+      database: heroku_app23683383
+      host: ds029277.mongolab.com
+      port: 29277
+      username:admin
+      password: admin123
+      options:
+        skip_version_check: true
+        safe: true
 development:
   # Configure available database sessions. (required)
   sessions:
