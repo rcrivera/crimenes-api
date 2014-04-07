@@ -1,6 +1,8 @@
 CrimenesApi::Application.routes.draw do
 
+  match 'crimes', to: 'crimes#index', via: [:options]
   resources :crimes, :defaults => {:format => :json}
+
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
