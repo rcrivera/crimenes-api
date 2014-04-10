@@ -7,7 +7,7 @@ mongo_client = MongoClient.new("localhost")
 db = mongo_client.db("crimenes_api_development")
 coll = db.collection("crimes")
 
-json = File.read('../../../Downloads/crimes.json')
+json = File.read('crimes.json')
 obj = JSON.parse(json)
 
 obj['features'].each do |n|

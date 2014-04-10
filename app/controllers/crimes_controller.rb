@@ -28,12 +28,18 @@ class CrimesController < ApplicationController
 	  	from_date = DateTime.strptime(params[:from_date], '%Y-%m-%d')
 	  	to_date = DateTime.strptime(params[:to_date], '%Y-%m-%d')
 
-	  	@crimes = Crime.where({"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}).and("property.time" => {:$gte => from_date, :$lte => Time.now.utc}) 
+	  	recordset = Crime.where({"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}).and("property.time" => {:$gte => from_date, :$lte => Time.now.utc})
+
+      @feature_collection = {:type => "FeatureCollection", :features => []}
+      recordset.each do |record|
+        f = {:type => "Feature", :geometry => {:type => 'Point',:coordinates => record['geometry']['coordinates']}, :properties => {:delito_id => record['property']['delito_id'], :time => record['property']['time']}}
+        @feature_collection[:features] << f
+      end
 	  rescue  
-	    @crimes = nil
+	    @feature_collection = nil
 	  end  
 	  respond_to do |format|
-      format.json { render :json => @crimes }
+      format.json { render :json => @feature_collection }
     end
   end
 end
