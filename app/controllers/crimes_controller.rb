@@ -3,6 +3,9 @@ class CrimesController < ApplicationController
 	skip_before_filter :verify_authenticity_token
   before_filter :cors_preflight_check
   after_filter :cors_set_access_control_headers
+  before_action :connect_db
+
+  include Mongo
 
   # For all responses in this controller, return the CORS access control headers.
   def cors_set_access_control_headers
@@ -23,25 +26,33 @@ class CrimesController < ApplicationController
   end
 
   def index
-  	begin  
-	    polygon = JSON.parse(params[:polygon])
-	  	from_date = DateTime.strptime(params[:from_date], '%Y-%m-%d')
-	  	to_date = DateTime.strptime(params[:to_date], '%Y-%m-%d')
+    begin  
+      polygon = JSON.parse(params[:polygon])
+      from_date = DateTime.strptime(params[:from_date], '%Y-%m-%d')
+      from_date = Time.utc(from_date.year, from_date.month, from_date.day)
+      to_date = DateTime.strptime(params[:to_date], '%Y-%m-%d')
+      to_date = Time.utc(to_date.year, to_date.month, to_date.day)
 
-	  	recordset = Crime.where({"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}).and("property.time" => {:$gte => from_date, :$lte => Time.now.utc})
+      recordset = @coll.find({ "$and" => [{"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}, {"properties.time" => {:$gte => from_date, :$lte => to_date}}]},:fields => {:_id => false})
 
-      @feature_collection = {:type => "FeatureCollection", :features => []}
-      recordset.each do |record|
-        f = {:type => "Feature", :geometry => {:type => 'Point',:coordinates => record['geometry']['coordinates']}, :properties => {:delito_id => record['property']['delito_id'], :time => record['property']['time']}}
-        @feature_collection[:features] << f
-      end
-	  rescue  
-	    @feature_collection = nil
-	  end  
+      @feature_collection = {:type => "FeatureCollection", :features => recordset}
+
+    rescue
+      @feature_collection = nil
+    end
 	  respond_to do |format|
       format.json { render :json => @feature_collection }
     end
   end
+
+  private
+    # Use callbacks to share common setup or constraints between actions.
+    def connect_db
+      mongo_client = MongoClient.new("ds029277.mongolab.com",29277)
+      db = mongo_client.db("heroku_app23683383")
+      auth = db.authenticate('admin', 'admin123')
+      @coll = db.collection("crimes")
+    end
 end
 
 # Sample url request

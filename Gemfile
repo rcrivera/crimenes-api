@@ -45,5 +45,5 @@ end
 
 gem 'rails_12factor'
 
-gem 'mongoid', github: 'mongoid/mongoid'
+gem 'mongo'
 gem 'bson_ext'
