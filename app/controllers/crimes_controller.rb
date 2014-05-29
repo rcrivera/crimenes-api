@@ -26,20 +26,24 @@ class CrimesController < ApplicationController
   end
 
   def index
-    begin  
-      polygon = JSON.parse(params[:polygon])
-      from_date = DateTime.strptime(params[:from_date], '%Y-%m-%d')
-      from_date = Time.utc(from_date.year, from_date.month, from_date.day)
-      to_date = DateTime.strptime(params[:to_date], '%Y-%m-%d')
-      to_date = Time.utc(to_date.year, to_date.month, to_date.day)
+    is_geojson = params[:is_geojson]
+    polygon = JSON.parse(params[:polygon])
+    from_date = DateTime.strptime(params[:from_date], '%Y-%m-%d')
+    from_date = Time.utc(from_date.year, from_date.month, from_date.day)
+    to_date = DateTime.strptime(params[:to_date], '%Y-%m-%d')
+    to_date = Time.utc(to_date.year, to_date.month, to_date.day)
+    #Rails.logger.info to_date
+    recordset = @coll.find({ "$and" => [{"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}, {"properties.time" => {:$gte => from_date, :$lte => to_date}}]},:fields => {:_id => false})
 
-      recordset = @coll.find({ "$and" => [{"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}, {"properties.time" => {:$gte => from_date, :$lte => to_date}}]},:fields => {:_id => false})
-
+    if is_geojson
       @feature_collection = {:type => "FeatureCollection", :features => recordset}
-
-    rescue
-      @feature_collection = nil
+    else
+      @feature_collection = []
+      recordset.each do |record|
+        @feature_collection << record['geometry']['coordinates']
+      end
     end
+
 	  respond_to do |format|
       format.json { render :json => @feature_collection }
     end
@@ -57,3 +61,4 @@ end
 
 # Sample url request
 # http://localhost:3000/crimes?polygon=[[-67.9809077,%2018.4054882],[-66.1122969,%2018.359121],[-66.0583415,%2018.3848264]]&from_date=2013-04-01&to_date=2014-04-22
+
