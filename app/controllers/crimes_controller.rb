@@ -35,12 +35,13 @@ class CrimesController < ApplicationController
     #Rails.logger.info to_date
     recordset = @coll.find({ "$and" => [{"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}, {"properties.time" => {:$gte => from_date, :$lte => to_date}}]},:fields => {:_id => false})
 
-    if is_geojson
+    if is_geojson == 'true'
       @feature_collection = {:type => "FeatureCollection", :features => recordset}
     else
       @feature_collection = []
       recordset.each do |record|
-        @feature_collection << record['geometry']['coordinates']
+        coordinates = [record['geometry']['coordinates'][1],record['geometry']['coordinates'][0]]
+        @feature_collection << coordinates
       end
     end
 
