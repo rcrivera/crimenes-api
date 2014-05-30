@@ -36,7 +36,38 @@ class CrimesController < ApplicationController
     recordset = @coll.find({ "$and" => [{"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}, {"properties.time" => {:$gte => from_date, :$lte => to_date}}]},:fields => {:_id => false})
 
     if is_geojson == 'true'
-      @feature_collection = {:type => "FeatureCollection", :features => recordset}
+      murder_collection = {:type => "FeatureCollection", :features => []}
+      rape_collection = {:type => "FeatureCollection", :features => []}
+      theft_collection = {:type => "FeatureCollection", :features => []}
+      aggression_collection = {:type => "FeatureCollection", :features => []}
+      breakin_collection = {:type => "FeatureCollection", :features => []}
+      misappropriation_collection = {:type => "FeatureCollection", :features => []}
+      carjacking_collection = {:type => "FeatureCollection", :features => []}
+      fire_collection = {:type => "FeatureCollection", :features => []}
+
+      recordset.each do |record|
+      case record["properties"]["delito_type"]
+        when 1 #murder
+          murder_collection[:features] << record
+        when 2 #rape
+          rape_collection[:features] << record
+        when 3 #theft
+          theft_collection[:features] << record
+        when 4 #agression
+          aggression_collection[:features] << record
+        when 5 #breakin
+          breakin_collection[:features] << record
+        when 6 #misappropriation
+          misappropiation_collection[:features] << record
+        when 7 #carjacking
+          carjacking_collection[:features] << record
+        when 8 #fire
+          fire_collection[:features] << record
+        end
+      end
+
+      @feature_collection = {:murder => murder_collection, :rape => rape_collection, :theft => theft_collection, :aggression => aggression_collection, :break_in => breakin_collection, :misappropriation => misappropriation_collection, :carjacking => carjacking_collection, :fire => fire_collection}
+
     else
       @feature_collection = []
       recordset.each do |record|
