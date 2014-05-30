@@ -58,7 +58,7 @@ class CrimesController < ApplicationController
         when 5 #breakin
           breakin_collection[:features] << record
         when 6 #misappropriation
-          misappropiation_collection[:features] << record
+          misappropriation_collection[:features] << record
         when 7 #carjacking
           carjacking_collection[:features] << record
         when 8 #fire
