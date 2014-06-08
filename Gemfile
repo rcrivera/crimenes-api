@@ -47,3 +47,4 @@ gem 'rails_12factor'
 
 gem 'mongo'
 gem 'bson_ext'
+gem 'geocoder'

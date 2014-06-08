@@ -26,14 +26,14 @@ class CrimesController < ApplicationController
   end
 
   def index
-    is_geojson = params[:is_geojson]
     polygon = JSON.parse(params[:polygon])
     from_date = DateTime.strptime(params[:from_date], '%Y-%m-%d')
     from_date = Time.utc(from_date.year, from_date.month, from_date.day)
     to_date = DateTime.strptime(params[:to_date], '%Y-%m-%d')
     to_date = Time.utc(to_date.year, to_date.month, to_date.day)
-    #Rails.logger.info to_date
-    recordset = @coll.find({ "$and" => [{"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}, {"properties.time" => {:$gte => from_date, :$lte => to_date}}]},:fields => {:_id => false})
+    week_day = "0".to_i
+
+    recordset = @coll.find({ "$and" => [{"geometry.coordinates" => {"$within" => {"$polygon" => polygon}}}, {"properties.time" => {:$gte => from_date, :$lte => to_date}},{"properties.week_day"=>{:$gte => week_day, :$lte => week_day}} ]},:fields => {:_id => false})
 
     if is_geojson == 'true'
       murder_collection = {:type => "FeatureCollection", :features => []}
@@ -46,7 +46,7 @@ class CrimesController < ApplicationController
       fire_collection = {:type => "FeatureCollection", :features => []}
 
       recordset.each do |record|
-      case record["properties"]["delito_type"]
+      case record["properties"]["crime_category"]
         when 1 #murder
           murder_collection[:features] << record
         when 2 #rape
@@ -84,9 +84,12 @@ class CrimesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def connect_db
-      mongo_client = MongoClient.new("ds029277.mongolab.com",29277)
-      db = mongo_client.db("heroku_app23683383")
-      auth = db.authenticate('admin', 'admin123')
+      #mongo_client = MongoClient.new("ds029277.mongolab.com",29277)
+      #db = mongo_client.db("heroku_app23683383")
+      #auth = db.authenticate('admin', 'admin123')
+      #@coll = db.collection("crimes")
+      mongo_client = MongoClient.new("localhost")
+      db = mongo_client.db("crimenes_api_development")
       @coll = db.collection("crimes")
     end
 end
