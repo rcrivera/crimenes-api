@@ -26,7 +26,6 @@ class CrimesController < ApplicationController
   end
 
   def index
-    is_geojson = params[:is_geojson]
     polygon = JSON.parse(params[:polygon])
     from_date = DateTime.strptime(params[:from_date], '%Y-%m-%d')
     from_date = Time.utc(from_date.year, from_date.month, from_date.day)
@@ -76,13 +75,13 @@ class CrimesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def connect_db
-      #mongo_client = MongoClient.new("ds029277.mongolab.com",29277)
-      #db = mongo_client.db("heroku_app23683383")
-      #auth = db.authenticate('admin', 'admin123')
-      #@coll = db.collection("crimes")
-      mongo_client = MongoClient.new("localhost")
-      db = mongo_client.db("crimenes_api_development")
+      mongo_client = MongoClient.new("ds029277.mongolab.com",29277)
+      db = mongo_client.db("heroku_app23683383")
+      auth = db.authenticate('admin', 'admin123')
       @coll = db.collection("crimes")
+      # mongo_client = MongoClient.new("localhost")
+      # db = mongo_client.db("crimenes_api_development")
+      # @coll = db.collection("crimes")
     end
 end
 
