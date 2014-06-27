@@ -4,6 +4,13 @@ require 'geocoder'
 
 include Mongo
 
+Geocoder.configure(
+	lookup: :mapquest,
+	:http_headers => { "Referer" => "https://*" },
+	:api_key => "Fmjtd%7Cluur2g6ynl%2Cb0%3Do5-9az294",
+	:timeout => 45
+)
+
 mongo_client = MongoClient.new("localhost")
 db = mongo_client.db("crimenes_api_development")
 db.drop_collection('crimes')
@@ -21,7 +28,11 @@ obj = JSON.parse(json)
 
 obj['features'].each do |n|
 	coordinates = [n['geometry']['coordinates'][0],n['geometry']['coordinates'][1]]
-	city = Geocoder.search(coordinates[1].to_s + ',' + coordinates[0].to_s).first.city
+	city = nil 
+	result = Geocoder.search(coordinates[1].to_s + ',' + coordinates[0].to_s).first
+	if (result) 
+    city = result.city
+  end
     
 	properties = n['properties']
 	year = properties['fecha_delito'][0,4].to_i
@@ -35,11 +46,12 @@ obj['features'].each do |n|
 	time = Time.new(year, month, day, hour, minute, second, tz_offset)
 	week_day = time.wday
 
-	doc = { 'geometry' => {"type"=>"Point", "coordinates" => coordinates}, "properties" => {"crime_category" => properties['delito_id'], "time" => time, "week_day" => week_day, "city" => city }}
+	doc = {'type'=>'Feature', 'geometry' => {"type"=>"Point", "coordinates" => coordinates}, "properties" => {"crime_category" => properties['delito_id'], "time" => time, "week_day" => week_day, "city" => city }}
 
 	id = coll.insert(doc)
 
-	puts id
+	puts city
+
 end
 
 coll.create_index({geometry: "2dsphere"})
