@@ -1,5 +1,7 @@
 CrimenesApi::Application.routes.draw do
 
+  get 'loaderio-eee279776145ab21ff2757756fe8de34' => 'loaderio#index'
+
   match 'crimes', to: 'crimes#index', via: [:options]
   resources :crimes, :defaults => {:format => :json}
 
